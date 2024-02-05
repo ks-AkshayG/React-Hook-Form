@@ -21,9 +21,9 @@ export const createUserData = async ({name, email, phone, state, city, address}:
 
 export const updateUserData = async({name, email, phone, state, city, address}: formDataTypes, id: number) => {
     const supares = await Supabase
-    .from('dataform')
-    .update({name, email, phone, state, city, address})
-    .eq('id', id)
+        .from('dataform')
+        .update({name, email, phone, state, city, address})
+        .eq('id', id)
 
     return supares
 }
@@ -39,10 +39,10 @@ export const getAllUserData = async() => {
 
 export const getSingleUserData = async (id: number) => {
     const supares = await Supabase
-    .from('dataform')
-    .select()
-    .eq('id', id)
-    .single()
+        .from('dataform')
+        .select()
+        .eq('id', id)
+        .single()
 
     return supares
 }
@@ -52,6 +52,15 @@ export const deleteUserData = async (id: number) => {
         .from('dataform')
         .delete()
         .eq('id', id)
+
+    return supares
+}
+
+export const getSearchedUserData = async (value: string) => {
+    const supares = await Supabase
+        .from('dataform')
+        .select()
+        .or(`name.fts.${value},email.fts.${value}`)
 
     return supares
 }

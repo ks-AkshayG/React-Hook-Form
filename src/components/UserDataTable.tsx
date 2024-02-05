@@ -1,3 +1,5 @@
+import { Table } from "@mantine/core";
+
 type TableDataValuesTypes = {
   formData: {
     id: number;
@@ -23,44 +25,50 @@ const UserDataTable = ({
   handleEditProp,
   handleDeleteProp,
 }: TableDataValuesTypes) => {
+
+  const data = formData.map((dataRow) => (
+    <Table.Tr key={dataRow.id} className="border border-black">
+      <Table.Td className={userTableDataStyle}>{dataRow.name}</Table.Td>
+      <Table.Td className={userTableDataStyle}>{dataRow.email}</Table.Td>
+      <Table.Td className={userTableDataStyle}>{dataRow.phone}</Table.Td>
+      <Table.Td className={userTableDataStyle}>{dataRow.state}</Table.Td>
+      <Table.Td className={userTableDataStyle}>{dataRow.city}</Table.Td>
+      <Table.Td className={userTableDataStyle}>{dataRow.address}</Table.Td>
+      <Table.Td className="border border-black pr-2 pl-1 text-center">
+        <button onClick={() => handleEditProp(dataRow.id)}>
+          <i className="bx bx-edit text-[20px]"></i>
+        </button>
+      </Table.Td>
+      <Table.Td className="border border-black pr-2 pl-1 text-center">
+        <button onClick={() => handleDeleteProp(dataRow.id)}>
+          <i className="bx bxs-message-square-x text-[20px]"></i>
+        </button>
+      </Table.Td>
+    </Table.Tr>
+  ))
+
   return (
-    <div>
+    <div className="">
       <div className="text-center font-extrabold my-3 text-[30px]">
         Table of Data
       </div>
 
-      <div className="w-full flex justify-center">
-        <table className="border border-black">
-          <tbody>
-            <tr className="border border-black text-center">
+      <div className="flex justify-center">
+
+        <Table striped highlightOnHover withTableBorder withColumnBorders>
+          <Table.Thead>
+          <Table.Tr className="border border-black text-center">
               {
                 userTableArray.map((value, index) => (
-                  <td className={userTableHeadingStyle} key={index}>{value}</td>
+                  <Table.Td className={userTableHeadingStyle} key={index}>{value}</Table.Td>
                 ))
               }
-            </tr>
-            {formData.map((dataRow) => (
-              <tr key={dataRow.id} className="border border-black">
-                <td className={userTableDataStyle}>{dataRow.name}</td>
-                <td className={userTableDataStyle}>{dataRow.email}</td>
-                <td className={userTableDataStyle}>{dataRow.phone}</td>
-                <td className={userTableDataStyle}>{dataRow.state}</td>
-                <td className={userTableDataStyle}>{dataRow.city}</td>
-                <td className={userTableDataStyle}>{dataRow.address}</td>
-                <td className="border border-black pr-2 pl-1 text-center">
-                  <button onClick={() => handleEditProp(dataRow.id)}>
-                    <i className="bx bx-edit text-[20px]"></i>
-                  </button>
-                </td>
-                <td className="border border-black pr-2 pl-1 text-center">
-                  <button onClick={() => handleDeleteProp(dataRow.id)}>
-                    <i className="bx bxs-message-square-x text-[20px]"></i>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </Table.Tr>
+          </Table.Thead>
+
+          <Table.Tbody>{ data }</Table.Tbody>
+        </Table>
+
       </div>
     </div>
   );

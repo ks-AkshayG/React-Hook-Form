@@ -5,12 +5,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import "yup-phone-lite";
 import { createUserData } from "../utility/UserDataOperations";
-import {
-  UserInputTypeField,
-  UserInputPhoneField,
-  UserSelectionField,
-  UserConditionalSelectionField,
-} from "../utility/UserFormUtility";
+import UserInputField from "../utility/MantineUserForm/UserInputField";
+import UserPhoneInput from "../utility/MantineUserForm/UserPhoneInput";
+import UserSelectInput from "../utility/MantineUserForm/UserStateInput";
+import UserConditionalSelectInput from "../utility/MantineUserForm/UserCityInput";
+import UserSubmitForm from "../utility/MantineUserForm/UserSubmitForm";
+import UserResetForm from "../utility/MantineUserForm/UserResetForm";
 
 export const States = ["Gujarat", "Maharashtra", "Rajasthan"];
 // const GujaratCities = ['Surat', 'Ahmedabad', 'Vadodara']
@@ -18,12 +18,23 @@ export const States = ["Gujarat", "Maharashtra", "Rajasthan"];
 // const RajasthanCities = ['Aligadh', 'Raypur']
 
 export const Cities: { [key: string]: { cities: string[] } } = {
-  "Gujarat": { cities: ["Surat", "Ahmedabad", "Vadodara"] },
-  "Maharashtra": { cities: ["Pune", "Mumbai"] },
-  "Rajasthan": { cities: ["Aligadh", "Raypur"] },
+  Gujarat: { cities: ["Surat", "Ahmedabad", "Vadodara"] },
+  Maharashtra: { cities: ["Pune", "Mumbai"] },
+  Rajasthan: { cities: ["Aligadh", "Raypur"] },
 };
 
-type formValues = {
+export type namePropTypes =
+  | "name"
+  | "email"
+  | "phone"
+  | "state"
+  | "city"
+  | "address"
+  | "address.line1"
+  | "address.line2"
+  | "address.postel";
+
+export type UserCreateFormValuesTypes = {
   name: string;
   email: string;
   phone: string;
@@ -82,23 +93,24 @@ const defaultFormValues = {
 
 const CreateUserForm = () => {
   const [status, setStatus] = useState(0);
-  const [stateValue, setStateValue] = useState("");
+  // const [stateValue, setStateValue] = useState("");
 
-  const form = useForm({
+  const form = useForm<UserCreateFormValuesTypes>({
     defaultValues: defaultFormValues,
     mode: "onBlur",
     resolver: yupResolver(schema),
   });
 
-  const { register, handleSubmit, formState, getValues } = form;
+  const { handleSubmit, formState, watch, control } = form;
 
   const { errors } = formState;
 
-  const handleStateValue = () => setStateValue(getValues("state"));
+  const handleReset = () => {
+    setStatus(0);
+    form.reset();
+  };
 
-  const handleReset = () => setStatus(0);
-
-  const onSubmit = (data: formValues) => {
+  const onSubmit = (data: UserCreateFormValuesTypes) => {
     const concatAddress = [
       data.address.line1,
       data.address.line2,
@@ -115,83 +127,81 @@ const CreateUserForm = () => {
     };
     insertDataForm();
   };
+  // console.log(getValues('state'))
 
   return (
     <div className="w-full h-full flex flex-col items-center">
       <h2 className="text-center font-extrabold my-3 text-[30px]">Data Form</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-
-        <UserInputTypeField
+        <UserInputField
           type="text"
-          fieldName="Name"
+          name="name"
+          label={fields.name}
           errorMessage={errors.name?.message}
-          register={register("name")}
+          control={control}
         />
 
         <div>
-          <UserInputTypeField
+          <UserInputField
             type="email"
-            fieldName="Email"
+            name="email"
+            label={fields.email}
             errorMessage={errors.email?.message}
-            register={register("email")}
+            control={control}
           />
           <p>{status == 409 && <>Please enter unique email address</>}</p>
         </div>
 
-        <UserInputPhoneField
-          type="number"
-          fieldName="Phone"
+        <UserPhoneInput
+          name="phone"
+          label={fields.phone}
           errorMessage={errors.phone?.message}
-          register={register("phone")}
+          control={control}
         />
 
-        <UserSelectionField
-          fieldName="State"
+        <UserSelectInput
+          name="state"
+          label={fields.state}
           errorMessage={errors.state?.message}
-          register={register("state")}
-          onClick={handleStateValue}
-          optionArray={States}
+          control={control}
+          // onClick={(value) => handleStateValue(value)}
+          data={States}
         />
 
-        <UserConditionalSelectionField
-          fieldName="City"
-          register={register("city")}
+        <UserConditionalSelectInput
+          name="city"
+          label="City"
           errorMessage={errors.city?.message}
-          condition1={stateValue}
+          condition={watch("state")}
+          control={control}
         />
 
         <div>
           <p>{fields.address}:</p>
-          <UserInputTypeField
+          <UserInputField
             type="text"
-            fieldName="Line1"
-            register={register("address.line1")}
+            name="address.line1"
+            label="Line1"
+            control={control}
           />
-          <UserInputTypeField
+          <UserInputField
             type="text"
-            fieldName="Line2"
-            register={register("address.line2")}
+            name="address.line2"
+            label="Line2"
+            control={control}
           />
-          <UserInputTypeField
-            type="text"
-            fieldName="Postel"
-            register={register("address.postel")}
+          <UserInputField
+            type="number"
+            name="address.postel"
+            label="Postel"
+            control={control}
           />
         </div>
 
-        <div className="w-full text-center my-3">
-          <input
-            type="submit"
-            className=" mx-3 border border-black hover:border-green-700 hover:bg-green-700 hover:text-white px-2 rounded-md"
-            value="Submit"
-          />
-          <input
-            type="reset"
-            className=" mx-3 border border-black hover:border-red-700 hover:bg-red-700 hover:text-white px-2 rounded-md"
-            onClick={handleReset}
-            value="Reset"
-          />
+        <div className="w-full flex flex-row justify-center my-3">
+          <UserSubmitForm />
+          <UserResetForm onClick={handleReset} />
         </div>
       </form>
       <div>

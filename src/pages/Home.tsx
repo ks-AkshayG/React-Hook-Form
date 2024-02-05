@@ -1,11 +1,12 @@
 import {useState, useEffect} from 'react'
 import UpdateUserForm from '../components/UpdateUserForm'
 import CreateUserForm from '../components/CreateUserForm'
-import { getAllUserData, deleteUserData } from '../utility/UserDataOperations'
+import { getAllUserData, deleteUserData, getSearchedUserData } from '../utility/UserDataOperations'
 import UserDataTable from '../components/UserDataTable'
+import { Button } from '@mantine/core'
+import { SearchBar } from '../utility/MantineUtility'
 
-
-type FetchedDataValuesTypes = {
+type SearchedDataValuesTypes = {
   id: number
   created_at: string
   name: string
@@ -18,13 +19,17 @@ type FetchedDataValuesTypes = {
 
 const Home = () => {
 
-  const [data, setData] = useState<FetchedDataValuesTypes>([]);
+  const [data, setData] = useState<SearchedDataValuesTypes>([]);
   const [fetchError, setFetchError] = useState(false);
 
   const [addData, setAddData] = useState(false);
   const [editData, setEditData] = useState(false);
 
   const [id, setId] = useState(0);
+
+  const [searchValue, setSearchValue] = useState('');
+  const [searchUserData, setSearchUserData] = useState<SearchedDataValuesTypes | null>();
+  const [searchStatus, setSearchStatus] = useState(0);
 
   useEffect(() => {
 
@@ -58,6 +63,21 @@ const Home = () => {
     setId(id)
   }
 
+  const handleSearchUserData = () => {
+    const getSearch = async () => {
+      const searchUserData = await getSearchedUserData(searchValue)
+
+      const userData = searchUserData.data
+
+      setSearchStatus(searchUserData.status)
+      setSearchUserData(userData)
+      
+      // console.log(searchUserData.status)
+      // console.log('console data',  userData)
+    }
+    getSearch()
+  }
+
   const handleDelete = async(id: number) => {
 
     const conformation = confirm("Are you sure you want to delete data?")
@@ -83,42 +103,42 @@ const Home = () => {
   }
 
   return (
-    <div className=' w-full h-full flex flex-col bg-gray-200'>
+    <div className=' w-full h-full flex flex-col bg-gray-100'>
       <div className='w-full '>
         {fetchError && (<div className=' text-center text-[40px] text-red-600 text-pretty'>Could not fetch the data</div>)}
-        {!fetchError && (<UserDataTable formData={data} handleEditProp={(id)=> handleEdit(id)} handleDeleteProp={(id) => handleDelete(id)} />)}
+        {!fetchError && (
+          <div>
+            <div className='flex justify-center'>
+              <SearchBar searchValue={searchValue} setSearchValue={setSearchValue} onClick={handleSearchUserData} />
+            </div>
+            {
+              (searchUserData && searchStatus === 200)  && (<UserDataTable formData={searchUserData} handleEditProp={(id)=> handleEdit(id)} handleDeleteProp={(id) => handleDelete(id)} />)
+            }
+            {
+              !searchUserData && (<UserDataTable formData={data} handleEditProp={(id)=> handleEdit(id)} handleDeleteProp={(id) => handleDelete(id)} />)
+            }
+            <div className='flex justify-center'>
+              <Button variant="filled" onClick={handleAddData} className=' my-2'>Add</Button>
+            </div>
+          </div>
+        )}
+        {addData && (
+            <div className=' absolute top-0 right-0 bg-gray-300 w-[70%] flex justify-center'>
+              <div className='absolute top-0 right-0'>
+                <button onClick={handleDataFormClose}><i className='bx bx-message-square-x text-[40px]'></i></button>
+              </div>
+                <CreateUserForm />
+            </div>
+        )}
+        {editData && (
+            <div className=' absolute top-0 right-0 bg-gray-300 w-[70%] flex justify-center'>
+              <div className='absolute top-0 right-0'>
+                <button onClick={handleUpdateFormClose}><i className='bx bx-message-square-x text-[40px]'></i></button>
+              </div>
+              <UpdateUserForm id={id} />
+            </div>
+        )}
       </div>
-      {
-        !fetchError && (
-          <div className='w-full flex justify-center'>
-            <button 
-              className='my-3 border w-fit hover:border-white border-green-600 hover:bg-green-600 hover:text-white rounded-md px-3'
-              onClick={handleAddData}
-              >add
-            </button>
-          </div>
-        )
-      }
-      {
-        addData && (
-          <div className=' absolute top-0 right-0 bg-gray-400 w-[70%] h-full flex justify-center'>
-            <div className='absolute top-0 right-0'>
-              <button onClick={handleDataFormClose}><i className='bx bx-message-square-x text-[40px]'></i></button>
-            </div>
-              <CreateUserForm />
-          </div>
-        )
-      }
-      {
-        editData && (
-          <div className=' absolute top-0 right-0 bg-gray-400 w-[70%] h-full flex justify-center'>
-            <div className='absolute top-0 right-0'>
-              <button onClick={handleUpdateFormClose}><i className='bx bx-message-square-x text-[40px]'></i></button>
-            </div>
-            <UpdateUserForm id={id} />
-          </div>
-        )
-      }
     </div>
   )
 }

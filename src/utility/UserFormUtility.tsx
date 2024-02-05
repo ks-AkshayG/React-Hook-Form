@@ -116,7 +116,7 @@ export const UserConditionalSelectionField = ({
         {fieldName}:
       </label>
       <select id="city" {...register}>
-        {condition1 === "" && <option value="">Select</option>}
+        {condition1 == "" && <option value="">Select</option>}
         {condition1 !== "" &&
           Cities[condition1].cities.map((option, index) => (
             <option key={index}>{option}</option>
