@@ -1,4 +1,8 @@
 import { Table } from "@mantine/core";
+import { ThemeIcon } from '@mantine/core';
+import { BiWindowClose } from "react-icons/bi";
+import { BiEdit } from "react-icons/bi";
+
 
 type TableDataValuesTypes = {
   formData: {
@@ -36,12 +40,12 @@ const UserDataTable = ({
       <Table.Td className={userTableDataStyle}>{dataRow.address}</Table.Td>
       <Table.Td className="border border-black pr-2 pl-1 text-center">
         <button onClick={() => handleEditProp(dataRow.id)}>
-          <i className="bx bx-edit text-[20px]"></i>
+          <ThemeIcon><BiEdit /></ThemeIcon>
         </button>
       </Table.Td>
       <Table.Td className="border border-black pr-2 pl-1 text-center">
         <button onClick={() => handleDeleteProp(dataRow.id)}>
-          <i className="bx bxs-message-square-x text-[20px]"></i>
+          <ThemeIcon><BiWindowClose /></ThemeIcon>
         </button>
       </Table.Td>
     </Table.Tr>

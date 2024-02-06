@@ -93,8 +93,8 @@ const Home = () => {
   }
 
   return (
-    <div className=' w-full h-full flex flex-col bg-gray-100'>
-      <div className='w-full '>
+    <div className='  w-full h-full flex flex-col bg-gray-100'>
+      <div className='w-full container mx-auto'>
         {fetchError && (<div className=' text-center text-[40px] text-red-600 text-pretty'>Could not fetch the data</div>)}
         {!fetchError && (
           <div>
@@ -112,7 +112,7 @@ const Home = () => {
             </div>
           </div>
         )}
-
+        
         <MantineDrawer opened={addDataDrawer} onClose={setAddDataDrawer.close} position='right' size='50%'>
           <CreateUserForm />
         </MantineDrawer>
