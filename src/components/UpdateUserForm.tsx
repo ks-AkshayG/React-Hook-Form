@@ -9,11 +9,11 @@ import {
   getSingleUserData,
 } from "../utility/UserDataOperations";
 import { States } from "../components/CreateUserForm";
-import UserInputField from "../utility/MantineUserForm/UserInputField";
+import UserTextInputField from "../utility/MantineUserForm/UserTextInputField";
 import UserPhoneInput from "../utility/MantineUserForm/UserPhoneInput";
 import UserSelectInput from "../utility/MantineUserForm/UserStateInput";
 import UserConditionalSelectInput from "../utility/MantineUserForm/UserCityInput";
-import UserAddressInput from "../utility/MantineUserForm/UserAddressInput";
+import UserTextareaInput from "../utility/MantineUserForm/UserTextareaInput";
 import UserSubmitForm from "../utility/MantineUserForm/UserSubmitForm";
 import UserResetForm from "../utility/MantineUserForm/UserResetForm";
 import { Cities } from "../components/CreateUserForm";
@@ -116,7 +116,7 @@ const UpdateUserForm = ({ id }: UpdateRowPropsTypes) => {
       </h2>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <UserInputField
+        <UserTextInputField
           type="text"
           name="name"
           label={fields.name}
@@ -125,7 +125,7 @@ const UpdateUserForm = ({ id }: UpdateRowPropsTypes) => {
         />
 
         <div>
-          <UserInputField
+          <UserTextInputField
             type="email"
             name="email"
             value={emailValue}
@@ -164,7 +164,7 @@ const UpdateUserForm = ({ id }: UpdateRowPropsTypes) => {
           {cityMatching === false && <>City is not matched with State</>}
         </p>
 
-        <UserAddressInput
+        <UserTextareaInput
           name="address"
           label={fields.address}
           errorMessage={errors.address?.message}

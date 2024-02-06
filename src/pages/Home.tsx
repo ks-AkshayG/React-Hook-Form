@@ -3,8 +3,10 @@ import UpdateUserForm from '../components/UpdateUserForm'
 import CreateUserForm from '../components/CreateUserForm'
 import { getAllUserData, deleteUserData, getSearchedUserData } from '../utility/UserDataOperations'
 import UserDataTable from '../components/UserDataTable'
-import { Button } from '@mantine/core'
-import { SearchBar } from '../utility/MantineUtility'
+import { SearchBar } from '../utility/MantineSearchBar'
+import { useDisclosure } from '@mantine/hooks';
+import { Button } from '@mantine/core';
+import MantineDrawer from '../utility/MantineDrawer'
 
 type SearchedDataValuesTypes = {
   id: number
@@ -22,14 +24,14 @@ const Home = () => {
   const [data, setData] = useState<SearchedDataValuesTypes>([]);
   const [fetchError, setFetchError] = useState(false);
 
-  const [addData, setAddData] = useState(false);
-  const [editData, setEditData] = useState(false);
-
   const [id, setId] = useState(0);
 
   const [searchValue, setSearchValue] = useState('');
   const [searchUserData, setSearchUserData] = useState<SearchedDataValuesTypes | null>();
   const [searchStatus, setSearchStatus] = useState(0);
+
+  const [addDataDrawer, setAddDataDrawer] = useDisclosure(false);
+  const [updateDataDrawer, setUpdateDataDrawer] = useDisclosure(false);
 
   useEffect(() => {
 
@@ -52,14 +54,10 @@ const Home = () => {
     }
     fetchDataTable()
 
-  }, [addData, editData])
-
-  const handleAddData = () => {
-    setAddData(true)
-  }
+  }, [addDataDrawer, updateDataDrawer])
 
   const handleEdit = (id: number) => {
-    setEditData(true)
+    setUpdateDataDrawer.open()
     setId(id)
   }
 
@@ -94,14 +92,6 @@ const Home = () => {
     }
   }
 
-  const handleDataFormClose = () => {
-    setAddData(false)
-  }
-
-  const handleUpdateFormClose = () => {
-    setEditData(false)
-  }
-
   return (
     <div className=' w-full h-full flex flex-col bg-gray-100'>
       <div className='w-full '>
@@ -118,26 +108,19 @@ const Home = () => {
               !searchUserData && (<UserDataTable formData={data} handleEditProp={(id)=> handleEdit(id)} handleDeleteProp={(id) => handleDelete(id)} />)
             }
             <div className='flex justify-center'>
-              <Button variant="filled" onClick={handleAddData} className=' my-2'>Add</Button>
+              <Button variant="filled" onClick={setAddDataDrawer.open} className=' my-2'>Add</Button>
             </div>
           </div>
         )}
-        {addData && (
-            <div className=' absolute top-0 right-0 bg-gray-300 w-[70%] flex justify-center'>
-              <div className='absolute top-0 right-0'>
-                <button onClick={handleDataFormClose}><i className='bx bx-message-square-x text-[40px]'></i></button>
-              </div>
-                <CreateUserForm />
-            </div>
-        )}
-        {editData && (
-            <div className=' absolute top-0 right-0 bg-gray-300 w-[70%] flex justify-center'>
-              <div className='absolute top-0 right-0'>
-                <button onClick={handleUpdateFormClose}><i className='bx bx-message-square-x text-[40px]'></i></button>
-              </div>
-              <UpdateUserForm id={id} />
-            </div>
-        )}
+
+        <MantineDrawer opened={addDataDrawer} onClose={setAddDataDrawer.close} position='right' size='50%'>
+          <CreateUserForm />
+        </MantineDrawer>
+
+        <MantineDrawer opened={updateDataDrawer} onClose={setUpdateDataDrawer.close} position='right' size='50%' >
+          <UpdateUserForm id={id} />
+        </MantineDrawer>
+
       </div>
     </div>
   )

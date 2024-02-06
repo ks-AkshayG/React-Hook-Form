@@ -5,7 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import "yup-phone-lite";
 import { createUserData } from "../utility/UserDataOperations";
-import UserInputField from "../utility/MantineUserForm/UserInputField";
+import UserTextInputField from "../utility/MantineUserForm/UserTextInputField";
 import UserPhoneInput from "../utility/MantineUserForm/UserPhoneInput";
 import UserSelectInput from "../utility/MantineUserForm/UserStateInput";
 import UserConditionalSelectInput from "../utility/MantineUserForm/UserCityInput";
@@ -105,6 +105,16 @@ const CreateUserForm = () => {
 
   const { errors } = formState;
 
+  // console.log(watch('phone'))
+
+  // const handleStateValue = (value: string) => {
+  //   if(value) {
+  //     setStateValue(value);
+  //     // console.log(value)
+  //   }
+  // }
+  // console.log(stateValue)
+
   const handleReset = () => {
     setStatus(0);
     form.reset();
@@ -134,7 +144,7 @@ const CreateUserForm = () => {
       <h2 className="text-center font-extrabold my-3 text-[30px]">Data Form</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <UserInputField
+        <UserTextInputField
           type="text"
           name="name"
           label={fields.name}
@@ -143,7 +153,7 @@ const CreateUserForm = () => {
         />
 
         <div>
-          <UserInputField
+          <UserTextInputField
             type="email"
             name="email"
             label={fields.email}
@@ -179,19 +189,19 @@ const CreateUserForm = () => {
 
         <div>
           <p>{fields.address}:</p>
-          <UserInputField
+          <UserTextInputField
             type="text"
             name="address.line1"
             label="Line1"
             control={control}
           />
-          <UserInputField
+          <UserTextInputField
             type="text"
             name="address.line2"
             label="Line2"
             control={control}
           />
-          <UserInputField
+          <UserTextInputField
             type="number"
             name="address.postel"
             label="Postel"
