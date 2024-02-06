@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 // import { DevTool } from '@hookform/devtools'
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -7,10 +7,8 @@ import "yup-phone-lite";
 import { createUserData } from "../utility/UserDataOperations";
 import UserTextInputField from "../utility/MantineUserForm/UserTextInputField";
 import UserPhoneInput from "../utility/MantineUserForm/UserPhoneInput";
-import UserSelectInput from "../utility/MantineUserForm/UserStateInput";
-import UserConditionalSelectInput from "../utility/MantineUserForm/UserCityInput";
-import UserSubmitForm from "../utility/MantineUserForm/UserSubmitForm";
-import UserResetForm from "../utility/MantineUserForm/UserResetForm";
+import UserSelectInput from "../utility/MantineUserForm/UserSelectInput";
+import Button from "../utility/MantineUserForm/Button";
 
 export const States = ["Gujarat", "Maharashtra", "Rajasthan"];
 // const GujaratCities = ['Surat', 'Ahmedabad', 'Vadodara']
@@ -92,6 +90,8 @@ const defaultFormValues = {
 };
 
 const CreateUserForm = () => {
+
+  const [cityData, setCityData] = useState(['']);
   const [status, setStatus] = useState(0);
   // const [stateValue, setStateValue] = useState("");
 
@@ -105,15 +105,13 @@ const CreateUserForm = () => {
 
   const { errors } = formState;
 
-  // console.log(watch('phone'))
+  useEffect(() => {
 
-  // const handleStateValue = (value: string) => {
-  //   if(value) {
-  //     setStateValue(value);
-  //     // console.log(value)
-  //   }
-  // }
-  // console.log(stateValue)
+    if (watch('state')) {
+      setCityData(Cities[watch('state')].cities)
+    }
+
+  }, [watch('state')])
 
   const handleReset = () => {
     setStatus(0);
@@ -175,16 +173,15 @@ const CreateUserForm = () => {
           label={fields.state}
           errorMessage={errors.state?.message}
           control={control}
-          // onClick={(value) => handleStateValue(value)}
           data={States}
         />
 
-        <UserConditionalSelectInput
+        <UserSelectInput
           name="city"
-          label="City"
+          label={fields.city}
           errorMessage={errors.city?.message}
-          condition={watch("state")}
           control={control}
+          data={cityData}
         />
 
         <div>
@@ -192,26 +189,26 @@ const CreateUserForm = () => {
           <UserTextInputField
             type="text"
             name="address.line1"
-            label="Line1"
+            label={fields.line1}
             control={control}
           />
           <UserTextInputField
             type="text"
             name="address.line2"
-            label="Line2"
+            label={fields.line2}
             control={control}
           />
           <UserTextInputField
             type="number"
             name="address.postel"
-            label="Postel"
+            label={fields.postel}
             control={control}
           />
         </div>
 
         <div className="w-full flex flex-row justify-center my-3">
-          <UserSubmitForm />
-          <UserResetForm onClick={handleReset} />
+          <Button type="submit" />
+          <Button type="reset" onClick={handleReset} />
         </div>
       </form>
       <div>

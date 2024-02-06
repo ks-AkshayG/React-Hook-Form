@@ -3,7 +3,6 @@ import { ThemeIcon } from '@mantine/core';
 import { BiWindowClose } from "react-icons/bi";
 import { BiEdit } from "react-icons/bi";
 
-
 type TableDataValuesTypes = {
   formData: {
     id: number;

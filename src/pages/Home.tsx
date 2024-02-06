@@ -7,6 +7,7 @@ import { SearchBar } from '../utility/MantineSearchBar'
 import { useDisclosure } from '@mantine/hooks';
 import { Button } from '@mantine/core';
 import MantineDrawer from '../utility/MantineDrawer'
+import MantineConfirmMenu from '../utility/MantineConfirmMenu'
 
 type SearchedDataValuesTypes = {
   id: number
@@ -24,7 +25,8 @@ const Home = () => {
   const [data, setData] = useState<SearchedDataValuesTypes>([]);
   const [fetchError, setFetchError] = useState(false);
 
-  const [id, setId] = useState(0);
+  const [updateID, setUpdateID] = useState(0);
+  const [deleteID, setDeleteID] = useState(0)
 
   const [searchValue, setSearchValue] = useState('');
   const [searchUserData, setSearchUserData] = useState<SearchedDataValuesTypes | null>();
@@ -32,6 +34,7 @@ const Home = () => {
 
   const [addDataDrawer, setAddDataDrawer] = useDisclosure(false);
   const [updateDataDrawer, setUpdateDataDrawer] = useDisclosure(false);
+  const [deleteConformation, setDeleteConformation] = useDisclosure(false);
 
   useEffect(() => {
 
@@ -58,7 +61,7 @@ const Home = () => {
 
   const handleEdit = (id: number) => {
     setUpdateDataDrawer.open()
-    setId(id)
+    setUpdateID(id)
   }
 
   const handleSearchUserData = () => {
@@ -77,19 +80,20 @@ const Home = () => {
   }
 
   const handleDelete = async(id: number) => {
+    setDeleteConformation.open()
+    setDeleteID(id)
+  }
 
-    const conformation = confirm("Are you sure you want to delete data?")
+  const handleConfirm = async() => {
+    setDeleteConformation.close()
 
-    if(conformation) {
+    const deleteData = await deleteUserData(deleteID)
 
-      const deleteData = await deleteUserData(id)
+    // console.log(deleteData.data)
 
-        console.log(deleteData.data)
-
-        setData(prevData => {
-          return prevData.filter(d => d.id != id)
-        })
-    }
+    setData(prevData => {
+      return prevData.filter(d => d.id != deleteID)
+    })
   }
 
   return (
@@ -118,8 +122,15 @@ const Home = () => {
         </MantineDrawer>
 
         <MantineDrawer opened={updateDataDrawer} onClose={setUpdateDataDrawer.close} position='right' size='50%' >
-          <UpdateUserForm id={id} />
+          <UpdateUserForm id={updateID} />
         </MantineDrawer>
+
+        <MantineConfirmMenu 
+          title='Are you sure? You want to Delete.' 
+          opened={deleteConformation}
+          onClose={setDeleteConformation.close}
+          onClick={handleConfirm}
+        />
 
       </div>
     </div>
