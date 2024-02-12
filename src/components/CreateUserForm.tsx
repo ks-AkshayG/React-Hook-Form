@@ -1,19 +1,15 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-// import { DevTool } from '@hookform/devtools'
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import "yup-phone-lite";
-import { createUserData } from "../utility/UserDataOperations";
-import UserTextInputField from "../utility/MantineUserForm/UserTextInputField";
-import UserPhoneInput from "../utility/MantineUserForm/UserPhoneInput";
-import UserSelectInput from "../utility/MantineUserForm/UserSelectInput";
-import Button from "../utility/MantineUserForm/Button";
+import MantineTextInputField from "../components/MantineFormInputes/MantineTextInputField";
+import MantinePhoneInput from "../components/MantineFormInputes/MantinePhoneInput";
+import MantineSelectInput from "../components/MantineFormInputes/MantineSelectInput";
+import MantineButton from "../components/MantineFormInputes/MantineButton";
+import useCreateUserData from "../utility/SupabaseOperations/useCreateUserData";
 
 export const States = ["Gujarat", "Maharashtra", "Rajasthan"];
-// const GujaratCities = ['Surat', 'Ahmedabad', 'Vadodara']
-// const MaharastraCities = ['Pune', 'Mumbai']
-// const RajasthanCities = ['Aligadh', 'Raypur']
 
 export const Cities: { [key: string]: { cities: string[] } } = {
   Gujarat: { cities: ["Surat", "Ahmedabad", "Vadodara"] },
@@ -65,7 +61,6 @@ const schema = yup.object({
     .label(fields.phone)
     .min(10, "please enter 10-digit valid phone number")
     .max(10, "please enter 10-digit valid phone number")
-    // .phone("IN", "Please enter a valid number")
     .required(),
   state: yup.string().required().label(fields.state),
   city: yup.string().required().label(fields.city),
@@ -92,8 +87,6 @@ const defaultFormValues = {
 const CreateUserForm = () => {
 
   const [cityData, setCityData] = useState(['']);
-  const [status, setStatus] = useState(0);
-  // const [stateValue, setStateValue] = useState("");
 
   const form = useForm<UserCreateFormValuesTypes>({
     defaultValues: defaultFormValues,
@@ -114,9 +107,10 @@ const CreateUserForm = () => {
   }, [watch('state')])
 
   const handleReset = () => {
-    setStatus(0);
     form.reset();
   };
+
+  const { mutate: createUser, data: createdUserData } = useCreateUserData()
 
   const onSubmit = (data: UserCreateFormValuesTypes) => {
     const concatAddress = [
@@ -126,14 +120,7 @@ const CreateUserForm = () => {
     ];
     const address = concatAddress.toString();
 
-    // console.log(name, email, phone, state, city,address)
-
-    const insertDataForm = async () => {
-      const insert = await createUserData({ ...data, address });
-      // console.log(insert.status)
-      setStatus(insert.status);
-    };
-    insertDataForm();
+    createUser({...data, address})
   };
   // console.log(getValues('state'))
 
@@ -142,7 +129,7 @@ const CreateUserForm = () => {
       <h2 className="text-center font-extrabold my-3 text-[30px]">Data Form</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <UserTextInputField
+        <MantineTextInputField
           type="text"
           name="name"
           label={fields.name}
@@ -151,24 +138,27 @@ const CreateUserForm = () => {
         />
 
         <div>
-          <UserTextInputField
+          <MantineTextInputField
             type="email"
             name="email"
             label={fields.email}
             errorMessage={errors.email?.message}
             control={control}
           />
-          <p>{status == 409 && <>Please enter unique email address</>}</p>
+          <span>
+            {createdUserData?.status == 409 &&
+             <p className=" text-[13px] text-red-700">Please enter unique email address</p>}
+          </span>
         </div>
 
-        <UserPhoneInput
+        <MantinePhoneInput
           name="phone"
           label={fields.phone}
           errorMessage={errors.phone?.message}
           control={control}
         />
 
-        <UserSelectInput
+        <MantineSelectInput
           name="state"
           label={fields.state}
           errorMessage={errors.state?.message}
@@ -176,7 +166,7 @@ const CreateUserForm = () => {
           data={States}
         />
 
-        <UserSelectInput
+        <MantineSelectInput
           name="city"
           label={fields.city}
           errorMessage={errors.city?.message}
@@ -186,19 +176,19 @@ const CreateUserForm = () => {
 
         <div>
           <p>{fields.address}:</p>
-          <UserTextInputField
+          <MantineTextInputField
             type="text"
             name="address.line1"
             label={fields.line1}
             control={control}
           />
-          <UserTextInputField
+          <MantineTextInputField
             type="text"
             name="address.line2"
             label={fields.line2}
             control={control}
           />
-          <UserTextInputField
+          <MantineTextInputField
             type="number"
             name="address.postel"
             label={fields.postel}
@@ -207,12 +197,12 @@ const CreateUserForm = () => {
         </div>
 
         <div className="w-full flex flex-row justify-center my-3">
-          <Button type="submit" />
-          <Button type="reset" onClick={handleReset} />
+          <MantineButton type="submit" />
+          <MantineButton type="reset" onClick={handleReset} />
         </div>
       </form>
       <div>
-        {status == 201 && (
+        {createdUserData?.status == 201 && (
           <div className=" text-[13px] text-green-700">
             Your data is successfully submited
           </div>

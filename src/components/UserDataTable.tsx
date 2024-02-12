@@ -13,7 +13,7 @@ type TableDataValuesTypes = {
     state: string;
     city: string;
     address: string;
-  }[];
+  }[] | null | undefined;
   handleEditProp: (id: number) => void;
   handleDeleteProp: (id: number) => void;
 };
@@ -29,7 +29,7 @@ const UserDataTable = ({
   handleDeleteProp,
 }: TableDataValuesTypes) => {
 
-  const data = formData.map((dataRow) => (
+  const data = formData?.map((dataRow) => (
     <Table.Tr key={dataRow.id} className="border border-black">
       <Table.Td className={userTableDataStyle}>{dataRow.name}</Table.Td>
       <Table.Td className={userTableDataStyle}>{dataRow.email}</Table.Td>

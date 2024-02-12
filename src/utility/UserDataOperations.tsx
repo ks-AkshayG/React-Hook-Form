@@ -1,6 +1,6 @@
 import Supabase from "../config/Supabase";
 
-type formDataTypes = {
+export type UserDataTypes = {
     name: string
     email: string
     phone: string
@@ -9,7 +9,7 @@ type formDataTypes = {
     address?: string
 }
 
-export const createUserData = async ({name, email, phone, state, city, address}: formDataTypes) => {
+export const createUserData = async ({name, email, phone, state, city, address}: UserDataTypes) => {
     const supares = await Supabase
       .from("dataform")
       .insert([{ name, email, phone, state, city, address }]);
@@ -19,7 +19,7 @@ export const createUserData = async ({name, email, phone, state, city, address}:
     return supares
 };
 
-export const updateUserData = async({name, email, phone, state, city, address}: formDataTypes, id: number) => {
+export const updateUserData = async({name, email, phone, state, city, address}: UserDataTypes, id: number) => {
     const supares = await Supabase
         .from('dataform')
         .update({name, email, phone, state, city, address})

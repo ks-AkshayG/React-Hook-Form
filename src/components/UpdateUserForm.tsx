@@ -1,20 +1,21 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-// import { DevTool } from '@hookform/devtools'
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useQuery } from "react-query";
 import * as yup from "yup";
+
 import "yup-phone-lite";
-import {
-  updateUserData,
-  getSingleUserData,
-} from "../utility/UserDataOperations";
-import { States } from "../components/CreateUserForm";
-import UserTextInputField from "../utility/MantineUserForm/UserTextInputField";
-import UserPhoneInput from "../utility/MantineUserForm/UserPhoneInput";
-import UserSelectInput from "../utility/MantineUserForm/UserSelectInput";
-import UserTextareaInput from "../utility/MantineUserForm/UserTextareaInput";
-import Button from "../utility/MantineUserForm/Button";
-import { Cities } from "../components/CreateUserForm";
+
+import { Cities, States } from "../components/CreateUserForm";
+import Supabase from "../config/Supabase";
+import MantineButton from "../components/MantineFormInputes/MantineButton";
+import MantinePhoneInput from "../components/MantineFormInputes/MantinePhoneInput";
+import MantineSelectInput from "../components/MantineFormInputes/MantineSelectInput";
+import MantineTextInputField from "../components/MantineFormInputes/MantineTextInputField";
+import MantineTextareaInput from "../components/MantineFormInputes/MantineTextareaInput";
+
+import { IUser } from "@/types/user";
+import { useUpdateUserData } from "@/utility/SupabaseOperations";
 
 const fields = {
   name: "Name",
@@ -42,7 +43,6 @@ const schema = yup.object({
     .label(fields.phone)
     .min(10, "please enter 10-digit valid phone number")
     .max(10, "please enter 10-digit valid phone number")
-    // .phone("IN", "Please enter a valid number")
     .required(),
   state: yup.string().required().label(fields.state),
   city: yup.string().required().label(fields.city),
@@ -54,32 +54,33 @@ type UpdateRowPropsTypes = {
 };
 
 const UpdateUserForm = ({ id }: UpdateRowPropsTypes) => {
-  const [cityData, setCityData] = useState(['']);
-  const [status, setStatus] = useState(0);
-  const [emailValue, setEmailValue] = useState("");
+  const [cityData, setCityData] = useState([""]);
   const [cityMatching, setCityMatching] = useState(true);
 
-  const fetchDefault = async () => {
-    const fetchRow = await getSingleUserData(id);
 
-    const data = fetchRow.data;
+  const { refetch } = useQuery(
+    ["get-user-data", id],
+    async () => {
+      const response = await Supabase.from("dataform")
+        .select()
+        .eq("id", id)
+        .single();
 
-    // console.log(fetchRow.data)
+      return response.data as IUser;
+    },
+    {
+      keepPreviousData: true,
+      enabled: false,
+    }
+  );
 
-    setEmailValue(data.email);
-
-    return {
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      state: data.state,
-      city: data.city,
-      address: data.address,
-    };
+  const refreshUserData = async () => {
+    const res = await refetch();
+    return res.data as IUser;
   };
 
   const form = useForm<UserUpdateFormValuesTypes>({
-    defaultValues: fetchDefault,
+    defaultValues: refreshUserData,
     mode: "onBlur",
     resolver: yupResolver(schema),
   });
@@ -89,31 +90,22 @@ const UpdateUserForm = ({ id }: UpdateRowPropsTypes) => {
   const { errors } = formState;
 
   useEffect(() => {
-
-    if (watch('state')) {
-      setCityData(Cities[watch('state')].cities)
+    if (watch("state")) {
+      setCityData(Cities[watch("state")].cities); //
     }
-
-  }, [watch('state')])
+  }, [watch("state")]);
 
   const handleReset = () => {
-    setStatus(0);
     form.reset();
   };
-  // console.log(stateValue)
+
+  const { mutate: updateUser, data: updatedUserData } = useUpdateUserData();
 
   const onSubmit = (data: UserUpdateFormValuesTypes) => {
-    // console.log(data)
 
-    const updateDataForm = async () => {
-      const update = await updateUserData({ ...data }, id);
-
-      // console.log(update.status);
-      setStatus(update.status);
-    };
-
-    Cities[getValues("state")].cities.includes(getValues("city")) ? (updateDataForm(), setCityMatching(true)) : setCityMatching(false)
-
+    Cities[getValues("state")].cities.includes(getValues("city"))
+      ? (updateUser({ ...data, id }), setCityMatching(true))
+      : setCityMatching(false);
   };
 
   return (
@@ -123,7 +115,7 @@ const UpdateUserForm = ({ id }: UpdateRowPropsTypes) => {
       </h2>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <UserTextInputField
+        <MantineTextInputField
           type="text"
           name="name"
           label={fields.name}
@@ -132,35 +124,37 @@ const UpdateUserForm = ({ id }: UpdateRowPropsTypes) => {
         />
 
         <div>
-          <UserTextInputField
+          <MantineTextInputField
             type="email"
             name="email"
-            value={emailValue}
             label={fields.email}
             errorMessage={errors.email?.message}
             control={control}
+            disable={true}
           />
           <p className=" text-[13px] text-red-700">
-            {status == 409 && <>Please enter unique email address</>}
+            {updatedUserData?.status == 409 && (
+              <>Please enter unique email address</>
+            )}
           </p>
         </div>
 
-        <UserPhoneInput
+        <MantinePhoneInput
           name="phone"
           label={fields.phone}
           control={control}
           errorMessage={errors.phone?.message}
         />
 
-        <UserSelectInput
+        <MantineSelectInput
           name="state"
           label={fields.state}
           control={control}
           errorMessage={errors.state?.message}
           data={States}
         />
-        
-        <UserSelectInput
+
+        <MantineSelectInput
           name="city"
           label={fields.city}
           control={control}
@@ -171,7 +165,7 @@ const UpdateUserForm = ({ id }: UpdateRowPropsTypes) => {
           {cityMatching === false && <>City is not matched with State</>}
         </p>
 
-        <UserTextareaInput
+        <MantineTextareaInput
           name="address"
           label={fields.address}
           errorMessage={errors.address?.message}
@@ -179,12 +173,12 @@ const UpdateUserForm = ({ id }: UpdateRowPropsTypes) => {
         />
 
         <div className="w-full flex flex-row justify-center my-3">
-          <Button type="submit" />
-          <Button type="reset" onClick={handleReset} />
+          <MantineButton type="submit" />
+          <MantineButton type="reset" onClick={handleReset} />
         </div>
       </form>
       <div>
-        {status == 204 && (
+        {updatedUserData?.status == 204 && (
           <div className=" text-[13px] text-green-700">
             Your data is successfully updated
           </div>
@@ -193,6 +187,7 @@ const UpdateUserForm = ({ id }: UpdateRowPropsTypes) => {
       {/* <DevTool control={control} /> */}
     </div>
   );
+  // }
 };
 
 export default UpdateUserForm;
